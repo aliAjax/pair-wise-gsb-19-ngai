@@ -1,158 +1,49 @@
+import { useState } from "react";
+import DispatchPage from "./pages/DispatchPage";
+import WaterChangePage from "./pages/WaterChangePage";
 import "./styles.css";
 
-const project = {
-  "id": "hxwl-05",
-  "port": 5105,
-  "title": "水族箱水质监测",
-  "subtitle": "多鱼缸水质趋势、换水和异常指标提醒",
-  "stack": "React + Vite + TypeScript + CSS",
-  "theme": [
-    "#0891b2",
-    "#16a34a",
-    "#f59e0b"
-  ],
-  "domain": "水族养护",
-  "users": [
-    "水族店员",
-    "玩家",
-    "维护师"
-  ],
-  "metrics": [
-    "pH",
-    "氨氮",
-    "硝酸盐",
-    "换水周期"
-  ],
-  "filters": [
-    "草缸",
-    "海缸",
-    "三湖缸",
-    "繁殖缸"
-  ],
-  "fields": [
-    "pH",
-    "氨氮",
-    "亚硝酸盐",
-    "硝酸盐",
-    "硬度",
-    "温度",
-    "换水量"
-  ],
-  "records": [
-    [
-      "草缸A",
-      "pH 6.8",
-      "稳定",
-      "硝酸盐18ppm，计划周末换水30%"
-    ],
-    [
-      "海缸B",
-      "pH 8.1",
-      "关注",
-      "钙硬度偏低，需复测"
-    ],
-    [
-      "繁殖缸C",
-      "pH 7.2",
-      "异常",
-      "亚硝酸盐升高，停止投喂"
-    ]
-  ]
-};
+type PageKey = "dispatch" | "water";
 
-const statusColors = ["status-ok", "status-watch", "status-danger"];
-
-function MetricCard({ label, value, index }: { label: string; value: string; index: number }) {
-  return (
-    <article className="metric-card">
-      <span>{label}</span>
-      <strong>{value}</strong>
-      <i className={statusColors[index % statusColors.length]} />
-    </article>
-  );
-}
+const PAGES: { key: PageKey; label: string }[] = [
+  { key: "dispatch", label: "应急调度台" },
+  { key: "water", label: "换水页" },
+];
 
 function App() {
-  const values = project.metrics.map((metric: string, index: number) => {
-    const base = [84, 12, 31, 7][index % 4];
-    return String(base + index * 3);
-  });
+  const [page, setPage] = useState<PageKey>("dispatch");
 
   return (
     <main className="app-shell">
       <section className="hero">
         <div>
-          <p className="eyebrow">{project.id} · port {project.port}</p>
-          <h1>{project.title}</h1>
-          <p className="subtitle">{project.subtitle}</p>
+          <p className="eyebrow">hxwl-05 · port 5105 · 水族养护</p>
+          <h1>水族店应急调度台</h1>
+          <p className="subtitle">
+            停电、停水、过滤故障不再靠口头招呼：登记异常生成工单，同水质暂养缸有位才转移，
+            维护师接单写明预计恢复时刻，恢复后按转移记录逐条确认回缸；工单未结的鱼缸在换水页无法完成换水。
+          </p>
         </div>
         <div className="stack-card">
           <span>技术栈</span>
-          <strong>{project.stack}</strong>
+          <strong>React + Vite + TypeScript + CSS</strong>
+          <span>记录 / 占用判定 / 页面 分层整理 · 无新增依赖</span>
         </div>
       </section>
 
-      <section className="metrics-grid">
-        {project.metrics.map((metric: string, index: number) => (
-          <MetricCard key={metric} label={metric} value={values[index]} index={index} />
+      <nav className="page-tabs">
+        {PAGES.map((p) => (
+          <button
+            key={p.key}
+            className={page === p.key ? "active" : ""}
+            onClick={() => setPage(p.key)}
+          >
+            {p.label}
+          </button>
         ))}
-      </section>
+      </nav>
 
-      <section className="workspace">
-        <aside className="panel narrow">
-          <h2>角色</h2>
-          <div className="chips">
-            {project.users.map((user: string) => (
-              <span key={user}>{user}</span>
-            ))}
-          </div>
-          <h2>筛选</h2>
-          <div className="chips muted">
-            {project.filters.map((filter: string) => (
-              <button key={filter}>{filter}</button>
-            ))}
-          </div>
-        </aside>
-
-        <section className="panel">
-          <div className="section-heading">
-            <div>
-              <p>{project.domain}</p>
-              <h2>记录字段</h2>
-            </div>
-            <button className="primary-action">新增记录</button>
-          </div>
-          <div className="field-grid">
-            {project.fields.map((field: string) => (
-              <label key={field}>
-                <span>{field}</span>
-                <input placeholder={"填写" + field} />
-              </label>
-            ))}
-          </div>
-        </section>
-      </section>
-
-      <section className="records panel">
-        <div className="section-heading">
-          <div>
-            <p>示例数据</p>
-            <h2>近期记录</h2>
-          </div>
-          <button>导出摘要</button>
-        </div>
-        <div className="record-list">
-          {project.records.map((record: string[], index: number) => (
-            <article key={record.join("-")} className="record-card">
-              <div className="record-index">{String(index + 1).padStart(2, "0")}</div>
-              <div>
-                <h3>{record[0]}</h3>
-                <p>{record.slice(1).join(" · ")}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      {page === "dispatch" ? <DispatchPage /> : <WaterChangePage />}
     </main>
   );
 }
